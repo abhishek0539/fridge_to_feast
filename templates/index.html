@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fridge to Feast -> Zero Waste Chef</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="hero-background">
+        <div class="container">
+            <header>
+                <h1><i class="fas fa-utensils"></i> Fridge-to-Feast</h1>
+                <p class="subtitle">AI-Powered Zero Waste Kitchen Assistant</p>
+            </header>
+
+            <section class="input-section">
+                <div class="input-box">
+                    <input type="text" id="ingredients" placeholder="e.g. rice, egg, paneer, spinach, tomato..." autofocus>
+                    <button onclick="cook()"><i class="fas fa-magic"></i> Cook Magic!</button>
+                </div>
+            </section>
+
+            <div id="status" class="status hidden">
+                <p><i class="fas fa-spinner fa-spin"></i> Crafting your zero-waste masterpiece...</p>
+                <div class="spinner"></div>
+            </div>
+
+            <div id="result" class="result hidden">
+                <div id="recipe" class="recipe-content"></div>
+                <button onclick="document.getElementById('result').classList.add('hidden'); document.getElementById('status').classList.add('hidden'); document.getElementById('ingredients').value = '';"><i class="fas fa-redo"></i> New Recipe</button>
+            </div>
+        </div>
+
+        <footer>
+            
+        </footer>
+    </div>
+
+    <script>
+        async function cook() {
+            const input = document.getElementById("ingredients").value.trim();
+            if (!input) return alert("Please enter some ingredients!");
+
+            document.getElementById("status").classList.remove("hidden");
+            document.getElementById("result").classList.add("hidden");
+
+            await fetch("/generate", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ingredients: input})
+            });
+
+            checkStatus();
+        }
+
+        async function checkStatus() {
+            const res = await fetch("/status");
+            const data = await res.json();
+
+            if (data.status === "cooking") {
+                setTimeout(checkStatus, 2000);
+            } else if (data.status === "done") {
+                document.getElementById("status").classList.add("hidden");
+                document.getElementById("recipe").innerHTML = marked ? marked.parse(data.recipe) : data.recipe;
+                document.getElementById("result").classList.remove("hidden");
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>

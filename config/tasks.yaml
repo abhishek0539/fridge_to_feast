@@ -1,0 +1,112 @@
+understand_ingredients:
+  description: >
+    Analyze the user's leftover ingredients: {ingredients}
+    For each ingredient, identify:
+    - Type (protein, vegetable, dairy, grain, etc.)
+    - Freshness level (fresh, wilting, almost bad)
+    - Flavor profile (sweet, sour, umami, etc.)
+    - Possible uses
+  expected_output: >
+    A detailed breakdown of all ingredients with categories and insights.
+  agent: ingredient_understander
+
+brainstorm_recipes:
+  description: >
+    Using the ingredient analysis, suggest 3 creative, delicious,
+    and realistic recipe ideas that use as many ingredients as possible.
+  expected_output: 3 ranked recipe concepts with titles and short descriptions.
+  agent: recipe_brainstormer
+  context:
+    - understand_ingredients
+
+optimize_zero_waste:
+  description: >
+    Take the top recipe idea and modify it to use EVERY ingredient provided,
+    including peels, stems, broth from bones, etc.
+  expected_output: A zero-waste version of the best recipe.
+  agent: zero_waste_optimizer
+  context:
+    - brainstorm_recipes
+
+handle_substitutions:
+  description: >
+    Check if any common ingredients are missing for the recipe.
+    Suggest smart, realistic substitutions from pantry staples
+    or confirm all are available.
+  expected_output: List of any substitutions needed + justification.
+  agent: substitution_agent
+  context:
+    - optimize_zero_waste
+
+write_cooking_steps:
+  description: >
+    Write clear, numbered, beginner-friendly cooking instructions
+    with exact steps, times, and tips.
+  expected_output: Full step-by-step cooking guide.
+  agent: step_by_step_cooking
+  context:
+    - optimize_zero_waste
+    - handle_substitutions
+
+balance_flavor_texture:
+  description: >
+    Review the recipe and suggest improvements to flavor balance
+    (salt, acid, sweetness) and texture (crunchy, creamy, etc.).
+  expected_output: Specific seasoning and technique recommendations.
+  agent: flavor_texture_agent
+  context:
+    - write_cooking_steps
+
+add_nutrition_insights:
+  description: >
+    Analyze the final recipe for nutritional balance.
+    Highlight protein, fiber, vitamins, calories per serving.
+  expected_output: Nutrition facts + health benefits summary.
+  agent: nutrition_health_agent
+  context:
+    - write_cooking_steps
+
+calculate_cost_savings:
+  description: >
+    Estimate how much money the user is saving by using leftovers.
+    Compare to buying a similar meal out.
+  expected_output: Cost analysis and savings estimate.
+  agent: cost_saving_agent
+  context:
+    - write_cooking_steps
+
+ensure_safety:
+  description: >
+    Review all steps for food safety: cooking temps, storage,
+    cross-contamination, handling raw meat, etc.
+  expected_output: Safety checklist and any warnings.
+  agent: safety_hygiene_agent
+  context:
+    - write_cooking_steps
+
+create_final_recipe:
+  description: >
+    Compile everything into one beautiful, complete recipe with:
+    - Title
+    - Description
+    - Prep/Cook Time
+    - Servings
+    - Ingredients list
+    - Step-by-step instructions
+    - Flavor tips
+    - Nutrition info
+    - Zero-waste score
+    - Money saved
+    - Safety notes
+  expected_output: >
+    A complete, ready-to-cook markdown recipe saved to output/final_recipe.md
+  agent: final_synthesizer
+  context:
+    - optimize_zero_waste
+    - write_cooking_steps
+    - balance_flavor_texture
+    - add_nutrition_insights
+    - calculate_cost_savings
+    - ensure_safety
+    - handle_substitutions
+  output_file: output/final_recipe.md
